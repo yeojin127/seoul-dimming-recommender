@@ -47,6 +47,7 @@ seoul-dimming-system/
     public/
 
   scripts/        # 로컬 실행/데모용 스크립트
+```
 
 
 ---
