@@ -1,0 +1,34 @@
+import type { Area, GridSummary, Recommendation } from '../types/domain';
+import { fetchAreasMock, fetchGridSummariesMock, fetchRecommendationDetailMock } from '../data/adapters/recoAdapter';
+
+// Types for Service Parameters
+export interface GridFilterParams {
+    timeStart: string;
+    timeEnd: string;
+    policyWeight: number; // 0-100
+}
+
+const RecoService = {
+    getAreas: async (): Promise<Area[]> => {
+        // Simulate network delay
+        return new Promise((resolve) => {
+            setTimeout(() => resolve(fetchAreasMock()), 300);
+        });
+    },
+
+    getGridSummaries: async (_params: GridFilterParams): Promise<GridSummary[]> => {
+        // In the future, _params would filter the results.
+        // For now, return all mocks.
+        return new Promise((resolve) => {
+            setTimeout(() => resolve(fetchGridSummariesMock()), 500);
+        });
+    },
+
+    getRecommendationDetail: async (gridId: string, _params: GridFilterParams): Promise<Recommendation | null> => {
+        return new Promise((resolve) => {
+            setTimeout(() => resolve(fetchRecommendationDetailMock(gridId)), 300);
+        });
+    }
+};
+
+export default RecoService;
