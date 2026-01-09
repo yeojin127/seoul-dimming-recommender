@@ -1,7 +1,9 @@
 # SW-경진대회 | 서울특별시 디밍 운영 제안 시스템
 
+
 - **팀명:** NewLight  
 - **팀원:** 장여진, 박서현, 이준희, 임유진
+
 
 ---
 
@@ -21,27 +23,31 @@
 3) 지도에서 격자 색으로 디밍 추천 정도 표시  
 4) 격자 클릭 시 추천 결과(디밍 시간/수준) 및 추천 근거(Top3)를 확인
 
+
 ---
 
 ## 2. 레포 파일 구조 (Monorepo)
 
+```text
 seoul-dimming-system/
-README.md
-.gitignore
-data/
-raw/ # 원본 데이터
-processed/ # 전처리 결과
+  README.md
+  .gitignore
 
-backend/
-pipeline/ # 수집/전처리/격자화 스크립트
-models/ # 점수화/추천 로직
-app/ # API 서버
+  data/
+    raw/          # 원본 데이터
+    processed/    # 전처리 결과
 
-frontend/
-src/ # 웹 UI(지도/필터/상세 패널)
-public/
+  backend/
+    pipeline/     # 수집/전처리/격자화 스크립트
+    models/       # 점수화/추천 로직
+    app/          # API 서버
 
-scripts/ # 로컬 실행/데모용 스크립트
+  frontend/
+    src/          # 웹 UI(지도/필터/상세 패널)
+    public/
+
+  scripts/        # 로컬 실행/데모용 스크립트
+
 
 ---
 
