@@ -1,49 +1,57 @@
 import React from 'react';
+import type { Recommendation } from '../../types/domain';
 
-export const GridDetailPanel: React.FC = () => {
+interface GridDetailPanelProps {
+    recommendation: Recommendation | null;
+}
+
+export const GridDetailPanel: React.FC<GridDetailPanelProps> = ({ recommendation }) => {
+    if (!recommendation) {
+        return (
+            <div style={{ padding: '1rem', color: '#666' }}>
+                Please select a grid from the map to see details.
+            </div>
+        );
+    }
+
+    const { grid_id, dim_percent, dim_hours, time_window, reasons } = recommendation;
+
     return (
         <div style={{
-            padding: '1rem',
-            border: '1px solid #ddd',
-            borderRadius: '8px',
-            backgroundColor: 'white',
-            height: '100%',
-            boxSizing: 'border-box'
+            padding: '1rem', border: '1px solid #ddd', borderRadius: '8px',
+            backgroundColor: 'white', height: '100%', boxSizing: 'border-box', overflowY: 'auto'
         }}>
             <h2>Detail Recommendation</h2>
 
-            {/* Sample Data Card */}
             <div style={{
-                marginTop: '1rem',
-                padding: '1rem',
-                border: '1px solid #ccc',
-                borderRadius: '8px',
-                background: '#f8f9fa'
+                marginTop: '1rem', padding: '1rem', border: '1px solid #ccc',
+                borderRadius: '8px', background: '#f8f9fa'
             }}>
-                <h3 style={{ margin: '0 0 0.5rem 0', color: '#333' }}>Grid ID: #A-104</h3>
+                <h3 style={{ margin: '0 0 0.5rem 0', color: '#333' }}>Grid ID: #{grid_id}</h3>
 
                 <div style={{ marginBottom: '1rem' }}>
                     <strong>Suggested Dimming Level:</strong>
-                    <div style={{ fontSize: '1.5rem', color: '#007bff' }}>50%</div>
+                    <div style={{ fontSize: '1.5rem', color: '#007bff' }}>{dim_percent}%</div>
                 </div>
 
                 <div style={{ marginBottom: '1rem' }}>
                     <strong>Duration:</strong>
-                    <div>3 hours (01:00 ~ 04:00)</div>
+                    <div>{dim_hours} hours ({time_window.start} ~ {time_window.end})</div>
                 </div>
 
                 <div>
                     <strong>Reasoning (Top 3):</strong>
                     <ul style={{ paddingLeft: '1.2rem', marginTop: '0.5rem' }}>
-                        <li>Low pedestrian grouping detected (01:00-02:00)</li>
-                        <li>Energy saving target requires -15% reduction</li>
-                        <li>Historical safety index is stable in this sector</li>
+                        {reasons.map((reason) => (
+                            <li key={reason.key} style={{ marginBottom: '0.5rem' }}>
+                                <div>
+                                    <strong>{reason.label}</strong> ({reason.direction})
+                                </div>
+                                {reason.evidence && <div style={{ fontSize: '0.85rem', color: '#555' }}>- {reason.evidence}</div>}
+                            </li>
+                        ))}
                     </ul>
                 </div>
-            </div>
-
-            <div style={{ marginTop: '1rem', fontStyle: 'italic', color: '#666' }}>
-                * Select a grid on the map to see details.
             </div>
         </div>
     );
