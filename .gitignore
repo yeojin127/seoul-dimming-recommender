@@ -1,0 +1,15 @@
+# data
+data/raw/
+data/raw/**
+
+# env
+.env
+*.key
+
+# python
+.venv/
+__pycache__/
+*.pyc
+
+# node
+node_modules/
