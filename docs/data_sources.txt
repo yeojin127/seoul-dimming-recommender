@@ -1,0 +1,14 @@
+국토교통부_전국 법정동_20250807.csv : 전국 법정동
+make_seoul_eupmyeondong.py : 서울의 법정동만 추출하는 코드
+seoul_eupmyeondong_codes.csv : 서울의 법정동
+
+
+get_seoul_brtitle_info.py : 표제부에서 서울의 모든 건물들을 한 행씩 API 호출(국토교통부_건축HUB_건축물대장정보 서비스 https://www.data.go.kr/data/15134735/openapi.do)
+seoul_brtitle_raw_csv : 서울의 건물 정보
+
+
+get_seoul_ntl.py : 서울의 야간조도(250m 격자) gee 코드(https://developers.google.com/earth-engine/datasets/catalog/NOAA_VIIRS_DNB_MONTHLY_V1_VCMSLCFG?hl=ko)
+seoul_ntl_2025_grid_points_250m.csv : 서울의 2025 1~3월 평균 야간조도(250m 격자)
+
+
+서울시 안심이 CCTV 연계 현황 : 서울의 2025.12.02 기준 안심이 cctv(위도,경도)
