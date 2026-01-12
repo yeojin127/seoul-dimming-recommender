@@ -1,0 +1,20 @@
+[
+    {
+        "gu": "Seocho-gu",
+        "dongs": [
+            "Seocho-dong",
+            "Bangbae-dong",
+            "Yangjae-dong",
+            "Banpo-dong"
+        ]
+    },
+    {
+        "gu": "Gangnam-gu",
+        "dongs": [
+            "Yeoksam-dong",
+            "Samsung-dong",
+            "Cheongdam-dong",
+            "Sinsa-dong"
+        ]
+    }
+]
