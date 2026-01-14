@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { FiltersBar } from '../../components/Filters/FiltersBar';
 import { MapView } from '../../components/Map/MapView';
 import { GridDetailPanel } from '../../components/Panel/GridDetailPanel';
+import { LogoutButton } from '../../components/Header/LogoutButton';
 import RecoService from '../../services/recoService';
 import type { Area, GridCell, Recommendation } from '../../types/domain';
 
@@ -63,8 +64,8 @@ export const MapPage: React.FC = () => {
 
     return (
         <div id="map-page" className="map-page" style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-            {/* Top: Filters */}
-            <div style={{ flex: '0 0 auto' }}>
+            {/* Top: Filters + Logout */}
+            <div style={{ flex: '0 0 auto', position: 'relative' }}>
                 <FiltersBar
                     areas={areas}
                     selectedGu={selectedGu}
@@ -72,6 +73,9 @@ export const MapPage: React.FC = () => {
                     onGuChange={handleGuChange}
                     onDongChange={setSelectedDong}
                 />
+                <div style={{ position: 'absolute', top: '1rem', right: '1rem' }}>
+                    <LogoutButton />
+                </div>
             </div>
 
             {/* Main Content */}
