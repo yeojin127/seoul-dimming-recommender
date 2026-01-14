@@ -3,8 +3,8 @@ import requests
 import pandas as pd
 
 # ====== 경로(지니 PC 기준) ======
-CODES_PATH = r"C:\Users\jyj20\Desktop\KW\2_winter\sw경진대회\data\seoul_eupmyeondong_codes.csv"
-OUT_PATH   = r"C:\Users\jyj20\Desktop\KW\2_winter\sw경진대회\data\seoul_brtitle_raw.csv"
+CODES_PATH = r"C:\Users\user\SW경진대회\seoul_eupmyeondong_codes.csv"
+OUT_PATH   = r"C:\Users\user\SW경진대회\seoul_brtitle_raw.csv"
 
 # ====== API ======
 BASE_URL = "https://apis.data.go.kr/1613000/BldRgstHubService/getBrTitleInfo"
@@ -77,6 +77,14 @@ def main():
 
     codes = load_codes(CODES_PATH)
     print("CODES LOADED:", codes.shape, list(codes.columns))
+    
+    codes["sigunguCd"] = codes["sigunguCd"].astype(str).str.zfill(5)
+    codes["bjdongCd_5"] = codes["bjdongCd_5"].astype(str).str.zfill(5)
+    
+    codes = codes[(codes["sigunguCd"]=="11200") & (codes["bjdongCd_5"].isin(["11400","11500"]))].reset_index(drop=True)
+    
+    print("FILTERED codes:", codes)
+
 
     session = requests.Session()
     all_rows = []
