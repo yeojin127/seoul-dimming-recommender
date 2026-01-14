@@ -28,8 +28,12 @@ export interface GridCell {
 
 export interface Recommendation {
     grid_id: string;
-    dim_percent: number; // 0, 30, 50, etc.
-    dim_hours: number;   // e.g. 3
+    // API-ready fields for future integration
+    existing_lx: number;        // 기존 조도
+    recommended_lx: number;     // 추천 조도
+    delta_percent: number;      // 기존 대비 변화량(%)
+    // UI display fields
+    dim_hours: number;          // e.g. 3
     time_window: TimeWindow;
     reasons: Reason[];
 }
@@ -37,6 +41,10 @@ export interface Recommendation {
 export interface GridSummary {
     grid_id: string;
     centroid: [number, number];
-    dim_percent: number;
+    // API-ready fields
+    existing_lx: number;
+    recommended_lx: number;
+    delta_percent: number;
+    // UI display fields
     dim_hours: number;
 }

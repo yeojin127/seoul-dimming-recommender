@@ -1,5 +1,13 @@
 [
     {
+        "gu": "Seongdong-gu",
+        "dongs": [
+            "Seongsu-dong",
+            "Haengdang-dong",
+            "Geumho-dong"
+        ]
+    },
+    {
         "gu": "Seocho-gu",
         "dongs": [
             "Seocho-dong",

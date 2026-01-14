@@ -15,10 +15,19 @@ export const fetchGridSummariesMock = (): GridSummary[] => {
     // In a real API, the backend would return this specific DTO.
     return gridsMock.map((grid) => {
         const reco = recoMock.find(r => r.grid_id === grid.grid_id);
+
+        // Use API-ready field names
+        const existing_lx = reco?.existing_lx ?? grid.ntl_mean ?? 100;
+        const recommended_lx = reco?.recommended_lx ?? existing_lx;
+        const delta_percent = reco?.delta_percent ??
+            ((recommended_lx - existing_lx) / existing_lx * 100);
+
         return {
             grid_id: grid.grid_id,
             centroid: grid.centroid as [number, number],
-            dim_percent: reco?.dim_percent ?? 0,
+            existing_lx,
+            recommended_lx,
+            delta_percent,
             dim_hours: reco?.dim_hours ?? 0,
         };
     });
