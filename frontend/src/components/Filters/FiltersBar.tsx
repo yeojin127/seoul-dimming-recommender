@@ -7,13 +7,12 @@ interface FiltersBarProps {
     selectedDong: string;
     onGuChange: (gu: string) => void;
     onDongChange: (dong: string) => void;
-    onApply: (policy: number) => void;
 }
 
 export const FiltersBar: React.FC<FiltersBarProps> = ({
     areas, selectedGu, selectedDong, onGuChange, onDongChange
 }) => {
-    
+
 
     const currentArea = areas.find(a => a.gu === selectedGu);
     const dongs = currentArea ? currentArea.dongs : [];
@@ -47,7 +46,7 @@ export const FiltersBar: React.FC<FiltersBarProps> = ({
             </div>
 
 
-            
+
         </div>
     );
 };

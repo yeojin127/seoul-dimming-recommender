@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { FiltersBar } from '../../components/Filters/FiltersBar';
-import { MapPlaceholder } from '../../components/Map/MapPlaceholder';
+import { MapView } from '../../components/Map/MapView';
 import { GridDetailPanel } from '../../components/Panel/GridDetailPanel';
 import RecoService from '../../services/recoService';
-import type { Area, GridSummary, Recommendation } from '../../types/domain';
+import type { Area, GridCell, Recommendation } from '../../types/domain';
 
 export const MapPage: React.FC = () => {
     // State
     const [areas, setAreas] = useState<Area[]>([]);
-    const [grids, setGrids] = useState<GridSummary[]>([]);
+    const [grids, setGrids] = useState<GridCell[]>([]);
     const [selectedGu, setSelectedGu] = useState<string>('');
     const [selectedDong, setSelectedDong] = useState<string>('');
 
@@ -30,14 +30,12 @@ export const MapPage: React.FC = () => {
         init();
     }, []);
 
-    // Fetch Grids when filters change (simulated)
+    // Fetch Grids when filters change
     useEffect(() => {
         const fetchGrids = async () => {
             setLoadingGrids(true);
-            // specific params can be passed here based on selectedDong/Gu if needed
-            const gridData = await RecoService.getGridSummaries({
-                timeStart: '01:00', timeEnd: '05:00', policyWeight: 50
-            });
+            // Load grid cells for map rendering
+            const gridData = await RecoService.getGridCells();
             setGrids(gridData);
             setLoadingGrids(false);
         };
@@ -47,7 +45,7 @@ export const MapPage: React.FC = () => {
     // Handle Grid Selection
     const handleGridClick = async (gridId: string) => {
         setSelectedGridId(gridId);
-        // Fetch details
+        // Fetch recommendation details from reco.mock.json
         const detail = await RecoService.getRecommendationDetail(gridId, {
             timeStart: '01:00', timeEnd: '05:00', policyWeight: 50
         });
@@ -73,15 +71,14 @@ export const MapPage: React.FC = () => {
                     selectedDong={selectedDong}
                     onGuChange={handleGuChange}
                     onDongChange={setSelectedDong}
-                    onApply={(policy) => console.log('Apply policy:', policy)}
                 />
             </div>
 
             {/* Main Content */}
             <div className="main-layout" style={{ flex: '1 1 auto', display: 'flex', overflow: 'hidden' }}>
-                {/* Left: Map List (70%) */}
-                <div className="map-area" style={{ flex: '7 1 0', padding: '1rem', overflow: 'hidden' }}>
-                    <MapPlaceholder
+                {/* Left: Map (70%) */}
+                <div className="map-area" style={{ flex: '7 1 0', overflow: 'hidden' }}>
+                    <MapView
                         grids={grids}
                         selectedGridId={selectedGridId}
                         onGridClick={handleGridClick}

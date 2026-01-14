@@ -11,23 +11,19 @@
         },
         "reasons": [
             {
-                "key": "safe_area",
-                "label": "Area is safe",
-                "direction": "UP",
-                "weight": 0.9,
-                "evidence": "Safety Score 85 (High)"
-            },
-            {
-                "key": "low_traffic",
-                "label": "Low Traffic",
-                "direction": "UP",
-                "weight": 0.8
-            },
-            {
-                "key": "residential",
-                "label": "Residential Area",
+                "key": "high_residential",
                 "direction": "DOWN",
-                "weight": 0.3
+                "label": "주거가 밀집해 빛침입/불편을 줄이기 위해 밝기를 낮춥니다."
+            },
+            {
+                "key": "high_traffic",
+                "direction": "UP",
+                "label": "야간 이동이 많아 안전을 위해 밝기를 유지합니다."
+            },
+            {
+                "key": "park_within",
+                "direction": "DOWN",
+                "label": "공원과 가깝기 때문에 생태 보호를 위해 밝기를 낮춥니다."
             }
         ]
     },
