@@ -64,7 +64,7 @@ export const MapPage: React.FC = () => {
     };
 
     return (
-        <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div id="map-page" className="map-page" style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
             {/* Top: Filters */}
             <div style={{ flex: '0 0 auto' }}>
                 <FiltersBar
@@ -78,9 +78,9 @@ export const MapPage: React.FC = () => {
             </div>
 
             {/* Main Content */}
-            <div style={{ flex: '1 1 auto', display: 'flex', overflow: 'hidden' }}>
-                {/* Left: Map List */}
-                <div style={{ flex: '2 1 0', padding: '1rem', overflow: 'hidden' }}>
+            <div className="main-layout" style={{ flex: '1 1 auto', display: 'flex', overflow: 'hidden' }}>
+                {/* Left: Map List (70%) */}
+                <div className="map-area" style={{ flex: '7 1 0', padding: '1rem', overflow: 'hidden' }}>
                     <MapPlaceholder
                         grids={grids}
                         selectedGridId={selectedGridId}
@@ -89,8 +89,8 @@ export const MapPage: React.FC = () => {
                     />
                 </div>
 
-                {/* Right: Panel */}
-                <div style={{ flex: '1 1 0', maxWidth: '400px', padding: '1rem', borderLeft: '1px solid #ddd', overflow: 'hidden' }}>
+                {/* Right: Panel (30%) */}
+                <div className="detail-panel-container" style={{ flex: '3 1 0', maxWidth: '500px', padding: '1rem', borderLeft: '1px solid #ddd', overflow: 'hidden' }}>
                     <GridDetailPanel recommendation={recommendation} />
                 </div>
             </div>

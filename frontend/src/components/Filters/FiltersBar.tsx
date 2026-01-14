@@ -19,10 +19,15 @@ export const FiltersBar: React.FC<FiltersBarProps> = ({
     const dongs = currentArea ? currentArea.dongs : [];
 
     return (
-        <div style={{
+        <div className="filters-bar" style={{
             display: 'flex', gap: '1rem', padding: '1rem', borderBottom: '1px solid #ddd',
             alignItems: 'center', backgroundColor: '#f9f9f9'
         }}>
+            {/* MVP Title */}
+            <div style={{ fontWeight: 'bold', fontSize: '1.1rem', marginRight: '1rem' }}>
+                성수동 MVP
+            </div>
+
             {/* Location */}
             <select value={selectedGu} onChange={e => onGuChange(e.target.value)}>
                 {areas.map(area => (
