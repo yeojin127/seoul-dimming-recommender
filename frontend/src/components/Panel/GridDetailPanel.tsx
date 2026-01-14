@@ -5,6 +5,15 @@ interface GridDetailPanelProps {
     recommendation: Recommendation | null;
 }
 
+// All influence variables with their display labels
+const ALL_VARIABLES = [
+    { key: 'night_traffic', label: '야간 교통량' },
+    { key: 'cctv_density', label: 'CCTV 밀집도' },
+    { key: 'park_within', label: '격자 이내(250m) 공원 유무' },
+    { key: 'commercial_density', label: '상권 밀집도' },
+    { key: 'residential_density', label: '주택 밀집도' },
+];
+
 export const GridDetailPanel: React.FC<GridDetailPanelProps> = ({ recommendation }) => {
     if (!recommendation) {
         return (
@@ -19,6 +28,9 @@ export const GridDetailPanel: React.FC<GridDetailPanelProps> = ({ recommendation
     // Format delta_percent with sign
     const deltaSign = delta_percent > 0 ? '+' : '';
     const deltaFormatted = `${deltaSign}${delta_percent.toFixed(1)}%`;
+
+    // Get Top3 reason keys for highlighting
+    const top3Keys = new Set(reasons.slice(0, 3).map(r => r.key));
 
     return (
         <div className="detail-panel" style={{
@@ -57,7 +69,7 @@ export const GridDetailPanel: React.FC<GridDetailPanelProps> = ({ recommendation
                     </div>
                 </div>
 
-                
+
                 {/* 4. Reasons Top3 */}
                 <div>
                     <strong>추천 근거 (Top 3):</strong>
@@ -72,6 +84,21 @@ export const GridDetailPanel: React.FC<GridDetailPanelProps> = ({ recommendation
                         ))}
                     </ul>
                 </div>
+            </div>
+
+            {/* 5. Influence Variables */}
+            <div className="influence-variables">
+                <h3>영향 변수</h3>
+                <ul>
+                    {ALL_VARIABLES.map((variable) => {
+                        const isTop3 = top3Keys.has(variable.key);
+                        return (
+                            <li key={variable.key} className={isTop3 ? 'is-top3' : 'is-dim'}>
+                                {variable.label}
+                            </li>
+                        );
+                    })}
+                </ul>
             </div>
         </div>
     );
