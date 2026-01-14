@@ -11,9 +11,9 @@ interface FiltersBarProps {
 }
 
 export const FiltersBar: React.FC<FiltersBarProps> = ({
-    areas, selectedGu, selectedDong, onGuChange, onDongChange, onApply
+    areas, selectedGu, selectedDong, onGuChange, onDongChange
 }) => {
-    const [policy, setPolicy] = React.useState(50);
+    
 
     const currentArea = areas.find(a => a.gu === selectedGu);
     const dongs = currentArea ? currentArea.dongs : [];
@@ -25,7 +25,7 @@ export const FiltersBar: React.FC<FiltersBarProps> = ({
         }}>
             {/* MVP Title */}
             <div style={{ fontWeight: 'bold', fontSize: '1.1rem', marginRight: '1rem' }}>
-                성수동 MVP
+                서울특별시 디밍 운영 제안 시스템
             </div>
 
             {/* Location */}
@@ -43,30 +43,11 @@ export const FiltersBar: React.FC<FiltersBarProps> = ({
 
             {/* Time Range (Hardcoded for now as per req, but can be props later) */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <input type="time" defaultValue="01:00" />
-                <span>~</span>
-                <input type="time" defaultValue="05:00" />
+                적용 시간대: 01:00~04:00
             </div>
 
-            {/* Policy */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <label>Policy: {policy}%</label>
-                <input
-                    type="range" min="0" max="100" value={policy}
-                    onChange={e => setPolicy(Number(e.target.value))}
-                />
-            </div>
 
-            {/* Apply */}
-            <button
-                onClick={() => onApply(policy)}
-                style={{
-                    padding: '0.5rem 1rem', backgroundColor: '#007bff', color: 'white',
-                    border: 'none', borderRadius: '4px', cursor: 'pointer'
-                }}
-            >
-                Apply
-            </button>
+            
         </div>
     );
 };

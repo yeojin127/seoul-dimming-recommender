@@ -14,7 +14,7 @@ export const GridDetailPanel: React.FC<GridDetailPanelProps> = ({ recommendation
         );
     }
 
-    const { grid_id, existing_lx, recommended_lx, delta_percent, dim_hours, time_window, reasons } = recommendation;
+    const { grid_id, existing_lx, recommended_lx, delta_percent, reasons } = recommendation;
 
     // Format delta_percent with sign
     const deltaSign = delta_percent > 0 ? '+' : '';
@@ -57,15 +57,10 @@ export const GridDetailPanel: React.FC<GridDetailPanelProps> = ({ recommendation
                     </div>
                 </div>
 
-                {/* Duration (UI display field) */}
-                <div style={{ marginBottom: '1rem' }}>
-                    <strong>Duration:</strong>
-                    <div>{dim_hours} hours ({time_window.start} ~ {time_window.end})</div>
-                </div>
-
+                
                 {/* 4. Reasons Top3 */}
                 <div>
-                    <strong>Reasoning (Top 3):</strong>
+                    <strong>추천 근거 (Top 3):</strong>
                     <ul className="reasons-list" style={{ paddingLeft: '1.2rem', marginTop: '0.5rem' }}>
                         {reasons.slice(0, 3).map((reason) => (
                             <li key={reason.key} style={{ marginBottom: '0.5rem' }}>
