@@ -1,20 +1,28 @@
 [
     {
-        "gu": "Seocho-gu",
+        "gu": "성동구",
         "dongs": [
-            "Seocho-dong",
-            "Bangbae-dong",
-            "Yangjae-dong",
-            "Banpo-dong"
+            "성수동",
+            "행당동",
+            "금호동"
         ]
     },
     {
-        "gu": "Gangnam-gu",
+        "gu": "서초구",
         "dongs": [
-            "Yeoksam-dong",
-            "Samsung-dong",
-            "Cheongdam-dong",
-            "Sinsa-dong"
+            "서초동",
+            "방배동",
+            "양재동",
+            "반포동"
+        ]
+    },
+    {
+        "gu": "강남구",
+        "dongs": [
+            "역삼동",
+            "삼성동",
+            "청담동",
+            "신사동"
         ]
     }
 ]

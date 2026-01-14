@@ -1,4 +1,4 @@
-import type { Area, GridSummary, Recommendation } from '../../types/domain';
+import type { Area, GridSummary, Recommendation, GridCell } from '../../types/domain';
 import areasMock from '../mock/areas.mock.json';
 import gridsMock from '../mock/grids.mock.json';
 import recoMock from '../mock/reco.mock.json';
@@ -10,22 +10,44 @@ export const fetchAreasMock = (): Area[] => {
     return areasMock as Area[];
 };
 
+export const fetchGridCellsMock = (): GridCell[] => {
+    // Normalize centroid from [lat, lon] array to {lat, lon} object
+    return gridsMock.map((grid: any) => ({
+        grid_id: grid.grid_id,
+        centroid: {
+            lat: grid.centroid[0],
+            lon: grid.centroid[1]
+        },
+        ntl_mean: grid.ntl_mean,
+        safety_score: grid.safety_score,
+        pollution_score: grid.pollution_score
+    }));
+};
+
 export const fetchGridSummariesMock = (): GridSummary[] => {
     // Join gridsMock and recoMock to create a summary
     // In a real API, the backend would return this specific DTO.
-    return gridsMock.map((grid) => {
-        const reco = recoMock.find(r => r.grid_id === grid.grid_id);
+    return gridsMock.map((grid: any) => {
+        const reco = recoMock.find((r: any) => r.grid_id === grid.grid_id);
+
+        // Use API-ready field names
+        const existing_lx = reco?.existing_lx ?? grid.ntl_mean ?? 100;
+        const recommended_lx = reco?.recommended_lx ?? existing_lx;
+        const delta_percent = reco?.delta_percent ??
+            ((recommended_lx - existing_lx) / existing_lx * 100);
+
         return {
             grid_id: grid.grid_id,
-            centroid: grid.centroid as [number, number],
-            dim_percent: reco?.dim_percent ?? 0,
+            existing_lx,
+            recommended_lx,
+            delta_percent,
             dim_hours: reco?.dim_hours ?? 0,
         };
     });
 };
 
 export const fetchRecommendationDetailMock = (gridId: string): Recommendation | null => {
-    const reco = recoMock.find(r => r.grid_id === gridId);
+    const reco = recoMock.find((r: any) => r.grid_id === gridId);
     if (!reco) return null;
     return reco as Recommendation;
 };

@@ -16,18 +16,19 @@ export const MapPlaceholder: React.FC<MapPlaceholderProps> = ({
     }
 
     return (
-        <div style={{
+        <div className="map-placeholder" style={{
             width: '100%', height: '100%', background: '#e0e0e0',
             padding: '1rem', boxSizing: 'border-box', overflowY: 'auto'
         }}>
             <h3>Grid List (Map Simulation)</h3>
             <p>Select a grid to see details.</p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '1rem' }}>
+            <div className="grid-list" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '1rem' }}>
                 {grids.map(grid => (
                     <div
                         key={grid.grid_id}
                         onClick={() => onGridClick(grid.grid_id)}
+                        className="grid-item"
                         style={{
                             padding: '1rem',
                             backgroundColor: selectedGridId === grid.grid_id ? '#007bff' : 'white',
@@ -38,8 +39,8 @@ export const MapPlaceholder: React.FC<MapPlaceholderProps> = ({
                         }}
                     >
                         <strong>{grid.grid_id}</strong>
-                        <div>Dim: {grid.dim_percent}%</div>
-                        <div>Hours: {grid.dim_hours}h</div>
+                        <div>Recommended: {grid.recommended_lx} lx</div>
+                        <div>Change: {grid.delta_percent > 0 ? '+' : ''}{grid.delta_percent.toFixed(0)}%</div>
                     </div>
                 ))}
             </div>
