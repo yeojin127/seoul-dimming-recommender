@@ -1,5 +1,5 @@
-import type { Area, GridSummary, Recommendation } from '../types/domain';
-import { fetchAreasMock, fetchGridSummariesMock, fetchRecommendationDetailMock } from '../data/adapters/recoAdapter';
+import type { Area, GridSummary, Recommendation, GridCell } from '../types/domain';
+import { fetchAreasMock, fetchGridSummariesMock, fetchRecommendationDetailMock, fetchGridCellsMock } from '../data/adapters/recoAdapter';
 
 // Types for Service Parameters
 export interface GridFilterParams {
@@ -13,6 +13,13 @@ const RecoService = {
         // Simulate network delay
         return new Promise((resolve) => {
             setTimeout(() => resolve(fetchAreasMock()), 300);
+        });
+    },
+
+    getGridCells: async (): Promise<GridCell[]> => {
+        // Load grid cells for map rendering
+        return new Promise((resolve) => {
+            setTimeout(() => resolve(fetchGridCellsMock()), 300);
         });
     },
 

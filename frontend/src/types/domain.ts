@@ -20,7 +20,7 @@ export interface Reason {
 
 export interface GridCell {
     grid_id: string;
-    centroid: [number, number]; // [lat, lng]
+    centroid: { lat: number; lon: number }; // Normalized from [lat, lon] array
     ntl_mean?: number;
     safety_score?: number;
     pollution_score?: number;
@@ -40,7 +40,6 @@ export interface Recommendation {
 
 export interface GridSummary {
     grid_id: string;
-    centroid: [number, number];
     // API-ready fields
     existing_lx: number;
     recommended_lx: number;
