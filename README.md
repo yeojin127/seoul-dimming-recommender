@@ -70,8 +70,8 @@ seoul-dimming-system/
 - `feat/pipeline` : 데이터 수집 / 전처리 / 격자화 (Backend)
 - `feat/api-reco` : 디밍 룰 설정 / 추천 로직 / AI 학습·성능평가 / API (Backend)
 - `feat/dummy-data` : 더미데이터 제작 (Backend)
-- `feat/ui` : UI/UX 설계 / 화면 구성 / PPT·보고서 정리 (Frontend)
-- `feat/map` : 지도 시각화 / API 연동 (Frontend)
+- `feat/ui` : UI/UX 설계 / 화면 구성 / 지도 시각화 / API 연동 (Frontend)
+
 
 ---
 
