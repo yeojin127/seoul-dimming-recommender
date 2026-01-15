@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from pathlib import Path
 
 # =========================
 # 설정
@@ -9,7 +8,7 @@ SRC_PATH = "C:/Users/jyj20/Desktop/KW/2_winter/seoul-dimming-recommender/data/pr
 OUT_PATH = "C:/Users/jyj20/Desktop/KW/2_winter/seoul-dimming-recommender/data/processed/dummy_features_9cols.csv"          # 결과 저장 파일명
 
 SEED = 42
-N = 50000   # 더미 행 수
+N = 50000
 
 rng = np.random.default_rng(SEED)
 
@@ -17,7 +16,6 @@ def clamp(x, lo, hi):
     return np.minimum(np.maximum(x, lo), hi)
 
 def rank01(x: np.ndarray):
-    """분위(0~1) 정규화: outlier 영향 줄여서 안정적"""
     s = pd.Series(x)
     r = s.rank(method="average").to_numpy()
     return (r - 1) / (len(r) - 1 + 1e-9)
@@ -31,52 +29,48 @@ src = pd.read_csv(SRC_PATH)
 src["traffic_sum"] = src[["traffic_01_02","traffic_02_03","traffic_03_04"]].sum(axis=1).astype(float)
 traffic_sum_anchor = src["traffic_sum"].to_numpy()
 
-cctv_anchor = src["cctv_density"].astype(float).to_numpy()
-cctv_anchor = clamp(cctv_anchor, 0, 1)
-
-park_in_grid_anchor = src["park_in_grid"].fillna(0).astype(int).to_numpy()
+cctv_anchor = clamp(src["cctv_density"].astype(float).to_numpy(), 0, 1)
+park_anchor = src["park_in_grid"].fillna(0).astype(int).to_numpy()
 
 # =========================
-# 1) 앵커에서 부트스트랩 샘플링 (성수동 분포 유지하면서 N개 생성)
+# 1) 부트스트랩 샘플링
 # =========================
 idx = rng.integers(0, len(src), size=N)
 
 traffic_sum = traffic_sum_anchor[idx]
 cctv_density = cctv_anchor[idx]
-park_in_grid = park_in_grid_anchor[idx]
+park_within = park_anchor[idx]  # 이름 통일
 
 traffic_sum = np.maximum(0, traffic_sum + rng.normal(0, np.std(traffic_sum_anchor) * 0.03, size=N))
 cctv_density = clamp(cctv_density + rng.normal(0, 0.03, size=N), 0, 1)
 
-# traffic 3개 컬럼으로 분배 (합은 traffic_sum 유지)
-w = rng.dirichlet([2.2, 2.0, 1.8], size=N)  # 01~02,02~03,03~04 비율
+w = rng.dirichlet([2.2, 2.0, 1.8], size=N)
 traffic_01_02 = traffic_sum * w[:, 0]
 traffic_02_03 = traffic_sum * w[:, 1]
 traffic_03_04 = traffic_sum * w[:, 2]
 
-# 내부 계산용 traffic_norm(0~1) (저장은 안 함)
-traffic_norm = rank01(traffic_sum)
+night_traffic = rank01(traffic_sum)  # 0~1 저장용
 
 # =========================
-# 2) commercial/residential_density 생성
+# 2) commercial/residential 생성
 # =========================
 commercial_density = clamp(
-    0.75 * traffic_norm + 0.20 * cctv_density + rng.normal(0, 0.08, size=N),
+    0.75 * night_traffic + 0.20 * cctv_density + rng.normal(0, 0.08, size=N),
     0, 1
 )
 
 residential_density = clamp(
-    0.70 * (1 - commercial_density) + 0.30 * park_in_grid + rng.normal(0, 0.10, size=N),
+    0.70 * (1 - commercial_density) + 0.30 * park_within + rng.normal(0, 0.10, size=N),
     0, 1
 )
 
 # =========================
-# 3) existing_lx 생성 (문서 규칙)
+# 3) existing_lx 생성
 # =========================
 commercial_index = (
     0.6 * commercial_density
     - 0.4 * residential_density
-    + 0.2 * traffic_norm
+    + 0.2 * night_traffic
 )
 
 q30 = np.quantile(commercial_index, 0.30)
@@ -85,30 +79,64 @@ q70 = np.quantile(commercial_index, 0.70)
 existing_lx = np.where(
     commercial_index >= q70, 25,
     np.where(commercial_index <= q30, 10, 15)
-).astype(int)
+).astype(float)
 
 # =========================
-# 4) grid_id 만들기
+# 4) grid_id
 # =========================
 grid_id = [f"{i:06d}" for i in range(1, N + 1)]
 
 # =========================
-# 5) 최종 9개 컬럼만 저장
+# 5) 저장 (필요 컬럼)
 # =========================
 df = pd.DataFrame({
     "grid_id": grid_id,
+    "night_traffic": night_traffic,          # 추가
     "cctv_density": cctv_density,
     "traffic_01_02": traffic_01_02,
     "traffic_02_03": traffic_02_03,
     "traffic_03_04": traffic_03_04,
-    "park_in_grid": park_in_grid,
+    "park_within": park_within,              # 이름 통일
     "commercial_density": commercial_density,
     "residential_density": residential_density,
-    "existing_lx": existing_lx,
+    "existing_lx": existing_lx.astype(int),
 })
 
 df.to_csv(OUT_PATH, index=False, encoding="utf-8-sig")
 
 print("saved:", OUT_PATH, "| rows:", len(df), "| cols:", df.shape[1])
+print("\n[existing_lx distribution]")
 print(df["existing_lx"].value_counts(normalize=True).sort_index().round(3))
 
+# =========================
+# 6) (추가) 추천조도 분포 체크 출력
+# =========================
+dim_raw = (
+    0.55*(1-night_traffic) +
+    0.45*park_within +
+    0.35*cctv_density +
+    0.80*residential_density
+)
+shield = (
+    0.70*night_traffic +
+    0.30*(1-park_within) +
+    0.25*(1-cctv_density) +
+    0.55*commercial_density
+)
+dim = clamp(dim_raw - shield, 0, 1)
+
+max_drop = np.where(existing_lx==25, 0.35, np.where(existing_lx==15, 0.30, 0.25))
+drop_ratio = max_drop * np.tanh(1.4 * dim)
+
+recommended_raw = existing_lx * (1 - drop_ratio)
+recommended_lx = clamp(recommended_raw, 2.0, existing_lx)
+
+maintain_rate = float(np.mean(np.isclose(recommended_lx, existing_lx)))
+min2_rate = float(np.mean(np.isclose(recommended_lx, 2.0)))
+avg_ratio = float(np.mean(recommended_lx / existing_lx))
+
+print("\n[recommended_lx checks]")
+print("maintain_rate (recommended==existing):", round(maintain_rate*100, 2), "%")
+print("min2_rate (recommended==2):", round(min2_rate*100, 2), "%")
+print("avg dimming ratio (recommended/existing):", round(avg_ratio, 4))
+print("avg saving rate:", round((1-avg_ratio)*100, 2), "%")
