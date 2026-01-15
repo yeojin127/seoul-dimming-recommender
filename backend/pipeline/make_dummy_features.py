@@ -5,11 +5,11 @@ from pathlib import Path
 # =========================
 # 설정
 # =========================
-SRC_PATH = "C:/Users/user/SW경진대회/grid_features_final_seoungsu.csv"   # 실데이터 (성수동 전처리본)
-OUT_PATH = "C:/Users/user/SW경진대회/dummy_features_9cols.csv"          # 결과 저장 파일명
+SRC_PATH = "C:/Users/jyj20/Desktop/KW/2_winter/seoul-dimming-recommender/data/processed/grid_features_final_seoungsu.csv"   # 실데이터 (성수동 전처리본)
+OUT_PATH = "C:/Users/jyj20/Desktop/KW/2_winter/seoul-dimming-recommender/data/processed/dummy_features_9cols.csv"          # 결과 저장 파일명
 
 SEED = 42
-N = 200000   # 더미 행 수
+N = 50000   # 더미 행 수
 
 rng = np.random.default_rng(SEED)
 
