@@ -1,6 +1,7 @@
 from pathlib import Path
 import numpy as np
 import pandas as pd
+import joblib
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
@@ -12,10 +13,12 @@ from sklearn.neural_network import MLPRegressor
 
 
 # =========================
-# 설정 (브랜치 상관없이 레포 기준)
+# 설정
 # =========================
 ROOT = Path(__file__).resolve().parents[2]   # seoul-dimming-recommender/
 PROCESSED = ROOT / "data" / "processed"
+MODELS_DIR = ROOT / "backend" / "models"
+MODELS_DIR.mkdir(parents=True, exist_ok=True)
 
 DATA_PATH = PROCESSED / "dummy_features_9cols.csv"
 OUT_TRAIN_READY = PROCESSED / "dummy_train_ready.csv"
@@ -27,7 +30,6 @@ def clamp(x, lo, hi):
 
 
 def compute_rule_recommended(df: pd.DataFrame):
-    # 입력 추출
     night_traffic = df["night_traffic"].to_numpy(dtype=float)
     cctv_density = clamp(df["cctv_density"].to_numpy(dtype=float), 0, 1)
     park_within = df["park_within"].to_numpy(dtype=int)
@@ -35,7 +37,6 @@ def compute_rule_recommended(df: pd.DataFrame):
     residential = clamp(df["residential_density"].to_numpy(dtype=float), 0, 1)
     existing_lx = df["existing_lx"].to_numpy(dtype=float)
 
-    # DIM / SHIELD (확정 버전)
     dim_raw = (
         0.55 * (1 - night_traffic)
         + 0.45 * park_within
@@ -52,11 +53,9 @@ def compute_rule_recommended(df: pd.DataFrame):
 
     dim = clamp(dim_raw - shield, 0, 1)
 
-    # 절감 튜닝 파라미터(확정값)
     max_drop = np.where(existing_lx == 25, 0.50, np.where(existing_lx == 15, 0.42, 0.35))
     drop_ratio = max_drop * np.tanh(2.6 * dim)
 
-    # recommended는 existing보다 커지면 안 됨 + 최소 2lx 보장
     recommended_raw = existing_lx * (1 - drop_ratio)
     recommended_lx = clamp(recommended_raw, 2.0, existing_lx)
 
@@ -72,22 +71,20 @@ def metrics(y_true, y_pred, name="model"):
 
 
 def main():
-    # 입력 파일 확인
     if not DATA_PATH.exists():
         raise FileNotFoundError(
             f"dummy 데이터가 없어: {DATA_PATH}\n"
-            f"먼저 make_dummy_features.py 실행해서 dummy_features_9cols.csv를 생성해줘."
+            f"main/feat-dummy-data에서 restore 하거나 make_dummy_features.py로 생성해줘."
         )
 
-    # 0) 로드
     df = pd.read_csv(DATA_PATH)
 
-    # 1) 타깃 생성(룰 기반)
+    # 1) 라벨 생성(룰 기반)
     y_rule, delta = compute_rule_recommended(df)
     df["recommended_lx"] = y_rule
     df["delta_percent"] = delta
 
-    # 2) 학습용 feature
+    # 2) feature / target
     feature_cols = [
         "night_traffic",
         "cctv_density",
@@ -96,11 +93,12 @@ def main():
         "residential_density",
         "existing_lx",
     ]
+
     X = df[feature_cols].copy()
     y = df["recommended_lx"].astype(float).to_numpy()
     existing = df["existing_lx"].astype(float).to_numpy()
 
-    # 3) split (train/val/test)
+    # 3) split
     X_train, X_tmp, y_train, y_tmp, ex_train, ex_tmp = train_test_split(
         X, y, existing, test_size=0.30, random_state=SEED
     )
@@ -110,7 +108,8 @@ def main():
 
     results = []
 
-    # (A) 주력: LightGBM (설치돼있으면 사용)
+    # (A) LightGBM
+    lgbm_model = None
     try:
         from lightgbm import LGBMRegressor
 
@@ -125,12 +124,12 @@ def main():
         lgbm_model.fit(X_train, y_train)
 
         pred = lgbm_model.predict(X_test)
-        pred = np.minimum(pred, ex_test)  # 정책(상한=existing)
+        pred = np.minimum(pred, ex_test)
         results.append(metrics(y_test, pred, "LightGBM"))
     except Exception as e:
-        print("[WARN] LightGBM 학습 스킵(설치 안됐거나 오류):", repr(e))
+        print("[WARN] LightGBM 스킵:", repr(e))
 
-    # (B) 베이스라인1: ElasticNet
+    # (B) ElasticNet
     elastic = Pipeline([
         ("scaler", StandardScaler()),
         ("model", ElasticNet(alpha=0.01, l1_ratio=0.5, random_state=SEED, max_iter=5000)),
@@ -140,7 +139,7 @@ def main():
     pred = np.minimum(pred, ex_test)
     results.append(metrics(y_test, pred, "ElasticNet"))
 
-    # (C) 베이스라인2: 작은 MLP
+    # (C) MLP
     mlp = Pipeline([
         ("scaler", StandardScaler()),
         ("model", MLPRegressor(
@@ -149,7 +148,9 @@ def main():
             solver="adam",
             alpha=1e-4,
             learning_rate_init=1e-3,
-            max_iter=60,
+            max_iter=200,
+            early_stopping=True,
+            n_iter_no_change=10,
             random_state=SEED,
         )),
     ])
@@ -158,14 +159,25 @@ def main():
     pred = np.minimum(pred, ex_test)
     results.append(metrics(y_test, pred, "MLP"))
 
-    # 4) 결과 출력
+    # 4) metrics 출력
     res_df = pd.DataFrame(results).sort_values("MAE")
     print("\n=== Test Metrics (lower is better for MAE/RMSE) ===")
     print(res_df.round(4).to_string(index=False))
 
-    # 5) (옵션) 학습용 데이터 저장 (원치 않으면 아래 2줄 주석 처리)
+    # 5) train-ready 저장(리포트용)
     df.to_csv(OUT_TRAIN_READY, index=False, encoding="utf-8-sig")
     print("\nsaved train-ready:", OUT_TRAIN_READY)
+
+    # 6) 모델 저장
+    if lgbm_model is not None:
+        joblib.dump(lgbm_model, MODELS_DIR / "lgbm_reco.pkl")
+        print("saved model:", MODELS_DIR / "lgbm_reco.pkl")
+
+    joblib.dump(elastic, MODELS_DIR / "elastic_reco.pkl")
+    print("saved model:", MODELS_DIR / "elastic_reco.pkl")
+
+    joblib.dump(mlp, MODELS_DIR / "mlp_reco.pkl")
+    print("saved model:", MODELS_DIR / "mlp_reco.pkl")
 
 
 if __name__ == "__main__":
