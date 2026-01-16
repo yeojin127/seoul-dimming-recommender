@@ -60,9 +60,6 @@ export const LoginPage: React.FC = () => {
                     </button>
                 </form>
 
-                <div className="login-footer">
-                    <p className="demo-info">Demo: admin / seoul1234</p>
-                </div>
             </div>
         </div>
     );
