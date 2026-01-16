@@ -1,9 +1,5 @@
 export type Direction = 'UP' | 'DOWN';
 
-export interface TimeWindow {
-    start: string; // HH:mm
-    end: string;   // HH:mm
-}
 
 export interface Area {
     gu: string;
@@ -14,8 +10,7 @@ export interface Reason {
     key: string;
     label: string;
     direction: Direction;
-    weight: number; // 0~1
-    evidence?: string;
+
 }
 
 export interface GridCell {
@@ -34,7 +29,6 @@ export interface Recommendation {
     delta_percent: number;      // 기존 대비 변화량(%)
     // UI display fields
     dim_hours: number;          // e.g. 3
-    time_window: TimeWindow;
     reasons: Reason[];
 }
 

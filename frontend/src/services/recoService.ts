@@ -24,8 +24,7 @@ const RecoService = {
     },
 
     getGridSummaries: async (_params: GridFilterParams): Promise<GridSummary[]> => {
-        // In the future, _params would filter the results.
-        // For now, return all mocks.
+
         return new Promise((resolve) => {
             setTimeout(() => resolve(fetchGridSummariesMock()), 500);
         });

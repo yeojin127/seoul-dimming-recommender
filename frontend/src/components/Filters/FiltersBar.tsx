@@ -45,8 +45,6 @@ export const FiltersBar: React.FC<FiltersBarProps> = ({
                 적용 시간대: 01:00~04:00
             </div>
 
-
-
         </div>
     );
 };

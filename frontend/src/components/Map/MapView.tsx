@@ -47,11 +47,7 @@ export const MapView: React.FC<MapViewProps> = ({
         features: gridFeatures
     };
 
-    // Debug logs
-    console.log("grid count:", grids.length);
-    console.log("first grid:", grids[0]);
-    console.log("first feature coords:", geoJsonData.features?.[0]?.geometry?.coordinates?.[0]?.[0]);
-    console.log("geoJsonData:", JSON.stringify(geoJsonData, null, 2));
+
 
     // Style function for each grid polygon
     const styleFeature = (feature: any) => {

@@ -7,7 +7,7 @@ import RecoService from '../../services/recoService';
 import type { Area, GridCell, Recommendation } from '../../types/domain';
 
 export const MapPage: React.FC = () => {
-    // State
+
     const [areas, setAreas] = useState<Area[]>([]);
     const [grids, setGrids] = useState<GridCell[]>([]);
     const [selectedGu, setSelectedGu] = useState<string>('');
