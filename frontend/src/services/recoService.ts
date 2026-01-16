@@ -10,31 +10,55 @@ export interface GridFilterParams {
 
 const RecoService = {
     getAreas: async (): Promise<Area[]> => {
-        // Simulate network delay
+        // Keep mock for areas as backend doesn't have an endpoint for this yet
         return new Promise((resolve) => {
             setTimeout(() => resolve(fetchAreasMock()), 300);
         });
     },
 
     getGridCells: async (): Promise<GridCell[]> => {
-        // Load grid cells for map rendering
-        return new Promise((resolve) => {
-            setTimeout(() => resolve(fetchGridCellsMock()), 300);
-        });
+        try {
+            const response = await fetch('/api/grids?area=seongsu');
+            if (!response.ok) throw new Error('Failed to fetch grids');
+            const data = await response.json();
+
+            // Map API response to GridCell domain model
+            return data.map((item: any) => ({
+                grid_id: item.grid_id,
+                centroid: {
+                    lat: item.centroid[0],
+                    lon: item.centroid[1]
+                },
+                ntl_mean: item.ntl_mean,
+                // Mock properties not yet in API
+                safety_score: Math.floor(Math.random() * 100),
+                pollution_score: Math.floor(Math.random() * 100)
+            }));
+        } catch (error) {
+            console.error("Error fetching grids:", error);
+            // Fallback to mock on error
+            return fetchGridCellsMock();
+        }
     },
 
     getGridSummaries: async (_params: GridFilterParams): Promise<GridSummary[]> => {
-        // In the future, _params would filter the results.
-        // For now, return all mocks.
+        // Unused in MapPage, keeping mock or empty
         return new Promise((resolve) => {
             setTimeout(() => resolve(fetchGridSummariesMock()), 500);
         });
     },
 
     getRecommendationDetail: async (gridId: string, _params: GridFilterParams): Promise<Recommendation | null> => {
-        return new Promise((resolve) => {
-            setTimeout(() => resolve(fetchRecommendationDetailMock(gridId)), 300);
-        });
+        try {
+            const response = await fetch(`/api/reco?grid_id=${gridId}`);
+            if (!response.ok) throw new Error('Failed to fetch recommendation');
+            const data = await response.json();
+            return data as Recommendation;
+        } catch (error) {
+            console.error("Error fetching recommendation:", error);
+            // Fallback to mock on error
+            return fetchRecommendationDetailMock(gridId);
+        }
     }
 };
 
