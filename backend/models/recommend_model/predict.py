@@ -1,15 +1,3 @@
-# predict_all_in_one.py
-# ------------------------------------------------------------
-# 한 번에 끝내는 버전:
-# 1) model.pkl 로드
-# 2) input.csv 로드(구분자 자동감지)
-# 3) LightGBM 예측(model_pred_lx)
-# 4) "밝히기 금지": recommended_lx = min(model_pred_lx, existing_lx)
-# 5) delta_percent 계산
-# 6) reasons top3 = LightGBM pred_contrib(행별 기여도 절대값 Top3)
-#    - 밝히기 금지(capped)인 행은 reason_1에 정책 사유(policy_cap|...|KEEP) 삽입
-# 7) predictions_postprocessed.csv 저장
-# ------------------------------------------------------------
 
 from pathlib import Path
 import json
@@ -22,11 +10,11 @@ HERE = Path(__file__).resolve().parent
 PKL_PATH = HERE / "lgbm_reco.pkl"
 IN_CSV   = HERE / "data_seoungsu.csv"
 OUT_CSV  = HERE / "predictions_postprocessed.csv"
-DBG_XCSV = HERE / "X_used_for_predict.csv"   # 디버그용(원하면 삭제해도 됨)
+DBG_XCSV = HERE / "X_used_for_predict.csv"   # 디버그용
 
 ID_COL_CANDIDATES = ["grid_id", "id"]
 
-# 라벨(원하는 문구로 바꿔도 됨)
+# 라벨
 LABEL = {
     "night_traffic": "야간교통량",
     "cctv_density": "CCTV 밀집도",
@@ -178,7 +166,7 @@ def main():
     out["existing_lx"] = existing.astype(float)
     out["model_pred_lx"] = pd.to_numeric(model_pred, errors="coerce").astype(float)
 
-    # ✅ 밝히기 금지(정책): 기존보다 높이면 유지
+    # 밝히기 금지(정책): 기존보다 높이면 유지
     out["recommended_lx"] = np.minimum(out["model_pred_lx"], out["existing_lx"])
 
     # 변화율(%)
@@ -214,7 +202,7 @@ def main():
     final["recommended_lx"] = final["recommended_lx"].round(3)
     final["delta_percent"] = final["delta_percent"].round(3)
 
-    # ✅ 최종 안전 체크: 추천이 기존보다 커지는 행이 있으면 터뜨림
+    # 최종 안전 체크: 추천이 기존보다 커지는 행이 있으면 터뜨림
     if (final["recommended_lx"] > final["existing_lx"]).any():
         bad = final.loc[final["recommended_lx"] > final["existing_lx"], ["grid_id", "existing_lx", "recommended_lx"]].head(10)
         raise ValueError(f"밝히기(증가) 케이스가 남아있음:\n{bad}")
@@ -231,3 +219,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
