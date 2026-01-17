@@ -3,6 +3,7 @@ import type { Recommendation } from '../../types/domain';
 
 interface GridDetailPanelProps {
     recommendation: Recommendation | null;
+    error?: string | null;
 }
 
 // All influence variables with their display labels
@@ -14,7 +15,16 @@ const ALL_VARIABLES = [
     { key: 'residential_density', label: '주택 밀집도' },
 ];
 
-export const GridDetailPanel: React.FC<GridDetailPanelProps> = ({ recommendation }) => {
+export const GridDetailPanel: React.FC<GridDetailPanelProps> = ({ recommendation, error }) => {
+    if (error) {
+        return (
+            <div className="detail-panel-error" style={{ padding: '1rem', color: '#d32f2f' }}>
+                <h3>Error Loading Recommendation</h3>
+                <pre style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem' }}>{error}</pre>
+            </div>
+        );
+    }
+
     if (!recommendation) {
         return (
             <div className="detail-panel-empty" style={{ padding: '1rem', color: '#666' }}>

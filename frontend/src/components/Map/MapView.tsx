@@ -68,7 +68,8 @@ export const MapView: React.FC<MapViewProps> = ({
     const onEachFeature = (feature: any, layer: L.Layer) => {
         layer.on({
             click: () => {
-                const gridId = feature.properties.grid_id;
+                const gridId = String(feature.properties.grid_id); // Force string
+                console.log("[MapView] Clicked grid:", gridId, typeof gridId);
                 onGridClick(gridId);
             },
             mouseover: (e: L.LeafletMouseEvent) => {
