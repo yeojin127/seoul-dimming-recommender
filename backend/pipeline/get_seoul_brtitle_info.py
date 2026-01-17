@@ -2,20 +2,20 @@ import time
 import requests
 import pandas as pd
 
-# ====== 경로(지니 PC 기준) ======
-CODES_PATH = r"C:\Users\jyj20\Desktop\KW\2_winter\sw경진대회\data\seoul_eupmyeondong_codes.csv"
-OUT_PATH   = r"C:\Users\jyj20\Desktop\KW\2_winter\sw경진대회\data\seoul_brtitle_raw.csv"
+# ====== 경로 ======
+CODES_PATH = r"C:\Users\user\SW경진대회\seoul_eupmyeondong_codes.csv"
+OUT_PATH   = r"C:\Users\user\SW경진대회\seoul_brtitle_raw.csv"
 
 # ====== API ======
 BASE_URL = "https://apis.data.go.kr/1613000/BldRgstHubService/getBrTitleInfo"
 SERVICE_KEY = "7f21f4475ba47bf878ab5d330844ffba7f33239d5b0d56d4b4cb946fa97b42fe"
 
 # ====== 수집 설정 ======
-NUM_ROWS = 1000          # 페이지당 최대 수(가능하면 크게)
-SLEEP_SEC = 0.2          # 과호출 방지
-TIMEOUT_SEC = 15         # 요청 타임아웃
-RETRY = 3                # 네트워크/일시 오류 재시도 횟수
-SAVE_EVERY_DONG = 10     # 동 몇 개마다 중간 저장할지
+NUM_ROWS = 1000          
+SLEEP_SEC = 0.2          
+TIMEOUT_SEC = 15         
+RETRY = 3                
+SAVE_EVERY_DONG = 10     
 
 def safe_get_json(session: requests.Session, url: str, params: dict, timeout: int, retry: int):
     """GET 요청을 안전하게 보내고, 성공(200)일 때만 JSON을 반환한다."""
@@ -77,6 +77,14 @@ def main():
 
     codes = load_codes(CODES_PATH)
     print("CODES LOADED:", codes.shape, list(codes.columns))
+    
+    codes["sigunguCd"] = codes["sigunguCd"].astype(str).str.zfill(5)
+    codes["bjdongCd_5"] = codes["bjdongCd_5"].astype(str).str.zfill(5)
+    
+    codes = codes[(codes["sigunguCd"]=="11200") & (codes["bjdongCd_5"].isin(["11400","11500"]))].reset_index(drop=True)
+    
+    print("FILTERED codes:", codes)
+
 
     session = requests.Session()
     all_rows = []
