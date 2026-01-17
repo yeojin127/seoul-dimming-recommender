@@ -10,10 +10,17 @@ export interface GridFilterParams {
 const RecoService = {
     getAreas: async (): Promise<Area[]> => {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         // Simulate network delay
         return new Promise((resolve) => {
             setTimeout(() => resolve(fetchAreasMock()), 300);
         });
+=======
+        // Backend does not have area endpoint yet, returning mock for now
+        return [
+            { gu: "Seongdong-gu", dongs: ["Seongsu-dong"] }
+        ];
+>>>>>>> Stashed changes
     },
 
     getGridCells: async (): Promise<GridCell[]> => {
