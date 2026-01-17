@@ -27,7 +27,14 @@ const RecoService = {
                 console.log("[RecoService] First grid raw:", data[0]);
             }
 
-            return data.map((item: any) => ({
+            // Define loose type for API response item
+            interface GridResponseItem {
+                grid_id: string | number;
+                centroid: [number, number];
+                ntl_mean?: number;
+            }
+
+            return data.map((item: GridResponseItem) => ({
                 grid_id: String(item.grid_id), // Force string
                 centroid: {
                     lat: item.centroid[0],
@@ -43,11 +50,11 @@ const RecoService = {
         }
     },
 
-    getGridSummaries: async (_params: GridFilterParams): Promise<GridSummary[]> => {
+    getGridSummaries: async (): Promise<GridSummary[]> => {
         return [];
     },
 
-    getRecommendationDetail: async (gridId: string, _params: GridFilterParams): Promise<Recommendation | null> => {
+    getRecommendationDetail: async (gridId: string): Promise<Recommendation | null> => {
         try {
             // Force string and encode
             const safeGridId = encodeURIComponent(String(gridId));
@@ -69,7 +76,6 @@ const RecoService = {
                 recommended_lx: data.recommended_lx,
                 delta_percent: data.delta_percent,
                 dim_hours: data.duration_hours || 3,
-                time_window: { start: "00:00", end: "04:00" },
                 reasons: data.reasons
             };
         } catch (error) {

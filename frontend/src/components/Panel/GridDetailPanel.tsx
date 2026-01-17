@@ -89,7 +89,8 @@ export const GridDetailPanel: React.FC<GridDetailPanelProps> = ({ recommendation
                                 <div>
                                     <strong>{reason.label}</strong> ({reason.direction})
                                 </div>
-                                {reason.evidence && <div style={{ fontSize: '0.85rem', color: '#555' }}>- {reason.evidence}</div>}
+
+
                             </li>
                         ))}
                     </ul>

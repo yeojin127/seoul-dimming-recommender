@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
 import type { GridCell } from '../../types/domain';
 import { makeSquare250mPolygon, getNtlColor, getNtlOpacity } from '../../utils/geoUtils';
@@ -18,8 +18,6 @@ export const MapView: React.FC<MapViewProps> = ({
     onGridClick,
     loading
 }) => {
-    const [geoJsonKey, setGeoJsonKey] = useState(0);
-
     // Seongsu-dong center coordinates
     const center: [number, number] = [37.544, 127.056];
     const zoom = 14;
@@ -51,8 +49,10 @@ export const MapView: React.FC<MapViewProps> = ({
 
     // Style function for each grid polygon
     const styleFeature = (feature: any) => {
-        const ntlMean = feature.properties.ntl_mean ?? 50;
-        const isSelected = feature.properties.grid_id === selectedGridId;
+        if (!feature || !feature.properties) return {};
+        const ntlMean = feature.properties['ntl_mean'] ?? 50;
+        const gridId = feature.properties['grid_id'];
+        const isSelected = gridId === selectedGridId;
 
         return {
             fillColor: getNtlColor(ntlMean),
@@ -65,12 +65,12 @@ export const MapView: React.FC<MapViewProps> = ({
     };
 
     // Handle grid click
-    const onEachFeature = (feature: any, layer: L.Layer) => {
+    const onEachFeature = (feature: Feature<Polygon>, layer: L.Layer) => {
         layer.on({
             click: () => {
-                const gridId = String(feature.properties.grid_id); // Force string
+                const gridId = String(feature?.properties?.grid_id ?? ""); // Force string
                 console.log("[MapView] Clicked grid:", gridId, typeof gridId);
-                onGridClick(gridId);
+                if (gridId) onGridClick(gridId);
             },
             mouseover: (e: L.LeafletMouseEvent) => {
                 const layer = e.target;
@@ -81,7 +81,7 @@ export const MapView: React.FC<MapViewProps> = ({
             },
             mouseout: (e: L.LeafletMouseEvent) => {
                 const layer = e.target;
-                const isSelected = feature.properties.grid_id === selectedGridId;
+                const isSelected = feature?.properties?.grid_id === selectedGridId;
                 layer.setStyle({
                     weight: isSelected ? 3 : 1,
                     opacity: isSelected ? 1 : 0.5,
@@ -90,16 +90,18 @@ export const MapView: React.FC<MapViewProps> = ({
         });
 
         // Bind tooltip
-        layer.bindTooltip(
-            `Grid: ${feature.properties.grid_id}<br/>NTL: ${feature.properties.ntl_mean}`,
-            { sticky: true }
-        );
+        const p = feature?.properties;
+        if (p) {
+            layer.bindTooltip(
+                `Grid: ${p.grid_id}<br/>NTL: ${p.ntl_mean}`,
+                { sticky: true }
+            );
+        }
     };
 
-    // Force re-render when selectedGridId changes
-    useEffect(() => {
-        setGeoJsonKey(prev => prev + 1);
-    }, [selectedGridId]);
+    // Force re-render when selectedGridId changes by updating the key
+    // This allows the style function to be re-applied with the new selection state
+    const geoJsonKey = `grid-layer-${selectedGridId || 'none'}-${grids.length}`;
 
     if (loading) {
         return (

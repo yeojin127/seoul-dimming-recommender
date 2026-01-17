@@ -3,7 +3,7 @@ import { FiltersBar } from '../../components/Filters/FiltersBar';
 import { MapView } from '../../components/Map/MapView';
 import { GridDetailPanel } from '../../components/Panel/GridDetailPanel';
 import { LogoutButton } from '../../components/Header/LogoutButton';
-import RecoService from '../../services/recoService';
+import RecoService from '../../services/recoService.ts';
 import type { Area, GridCell, Recommendation } from '../../types/domain';
 
 export const MapPage: React.FC = () => {
@@ -52,13 +52,12 @@ export const MapPage: React.FC = () => {
 
         try {
             // Fetch recommendation details from API
-            const detail = await RecoService.getRecommendationDetail(gridId, {
-                timeStart: '01:00', timeEnd: '05:00', policyWeight: 50
-            });
+            const detail = await RecoService.getRecommendationDetail(gridId);
             setRecommendation(detail);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("MapPage Error:", err);
-            setError(err.message || "Failed to load recommendation");
+            const errorMessage = err instanceof Error ? err.message : "Failed to load recommendation";
+            setError(errorMessage);
         }
     };
 
