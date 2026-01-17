@@ -76,10 +76,10 @@ seoul-dimming-recommender/
 │        ├─ building_seoungsu.ipynb             # 주거 건물, 상업 건물 밀집도 칼럼 구하기
 │        ├─ final_data_seongsu.ipynb            # 전처리 데이터 머지 및 빠진 연산 수행
 │        ├─ seongsu_preprocess.ipynb            # csv데이터(cctv, 공원, 가로등) 전처리
-│        └─ traffic_seongsu.ipynb               # 최종 성수 데이터
+│        └─ traffic_seongsu.ipynb               # 교통량 데이터
 ├─ data/
 │  └─ processed/
-│     ├─ data_seoungsu.csv                      
+│     ├─ data_seoungsu.csv                      # 최종 성수 데이터
 │     ├─ dummy_features_9cols.csv   
 │     ├─ dummy_train_ready.csv                  # 학습용 최종 전처리 더미데이터(피처·라벨 정리 완료)
 │     ├─ grid_features_final_seoungsu.csv       
