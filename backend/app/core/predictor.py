@@ -60,6 +60,7 @@ def predict_recommendation(grid_id: str, features: Dict[str, float]) -> Optional
             "existing_lx": round(existing_lx, 1),
             "recommended_lx": round(recommended_lx, 1),
             "delta_percent": round(delta_percent, 1),
+            "duration_hours": 3,
             "reasons": reasons[:3]  # Top 3 only
         }
     

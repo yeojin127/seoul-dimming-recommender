@@ -68,9 +68,9 @@ class GridDataLoader:
         result = []
         for _, row in grids_df.iterrows():
             result.append({
-                "grid_id": str(row['grid_id']),
-                "centroid": [float(row['lat']), float(row['lon'])],  # [lat, lon] format
-                "ntl_mean": float(row.get('traffic_01_02', 50)) / 30  # Normalize traffic as proxy for ntl
+                "grid_id": str(int(row['grid_id'])),  # Ensure "49" not "49.0"
+                "centroid": [float(row['lat']), float(row['lon'])],
+                "ntl_mean": float(row.get('traffic_01_02', 50)) / 30
             })
         
         return result
@@ -80,7 +80,8 @@ class GridDataLoader:
         self.load_data()
         
         try:
-            grid_id_int = int(grid_id)
+            # Handle "49" and "49.0" safely
+            grid_id_int = int(float(grid_id))
         except ValueError:
             return None
         
