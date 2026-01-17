@@ -1,6 +1,5 @@
 /**
  * Mock Authentication Utilities
- * Uses localStorage for simple auth state management
  */
 
 const AUTH_KEY = 'auth';

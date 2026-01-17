@@ -3,11 +3,11 @@ import { FiltersBar } from '../../components/Filters/FiltersBar';
 import { MapView } from '../../components/Map/MapView';
 import { GridDetailPanel } from '../../components/Panel/GridDetailPanel';
 import { LogoutButton } from '../../components/Header/LogoutButton';
-import RecoService from '../../services/recoService';
+import RecoService from '../../services/recoService.ts';
 import type { Area, GridCell, Recommendation } from '../../types/domain';
 
 export const MapPage: React.FC = () => {
-    // State
+
     const [areas, setAreas] = useState<Area[]>([]);
     const [grids, setGrids] = useState<GridCell[]>([]);
     const [selectedGu, setSelectedGu] = useState<string>('');
@@ -15,6 +15,7 @@ export const MapPage: React.FC = () => {
 
     const [selectedGridId, setSelectedGridId] = useState<string | null>(null);
     const [recommendation, setRecommendation] = useState<Recommendation | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     const [loadingGrids, setLoadingGrids] = useState<boolean>(false);
 
@@ -46,11 +47,18 @@ export const MapPage: React.FC = () => {
     // Handle Grid Selection
     const handleGridClick = async (gridId: string) => {
         setSelectedGridId(gridId);
-        // Fetch recommendation details from reco.mock.json
-        const detail = await RecoService.getRecommendationDetail(gridId, {
-            timeStart: '01:00', timeEnd: '05:00', policyWeight: 50
-        });
-        setRecommendation(detail);
+        setRecommendation(null);
+        setError(null);
+
+        try {
+            // Fetch recommendation details from API
+            const detail = await RecoService.getRecommendationDetail(gridId);
+            setRecommendation(detail);
+        } catch (err: unknown) {
+            console.error("MapPage Error:", err);
+            const errorMessage = err instanceof Error ? err.message : "Failed to load recommendation";
+            setError(errorMessage);
+        }
     };
 
     const handleGuChange = (gu: string) => {
@@ -92,7 +100,7 @@ export const MapPage: React.FC = () => {
 
                 {/* Right: Panel (30%) */}
                 <div className="detail-panel-container" style={{ flex: '3 1 0', maxWidth: '500px', padding: '1rem', borderLeft: '1px solid #ddd', overflow: 'hidden' }}>
-                    <GridDetailPanel recommendation={recommendation} />
+                    <GridDetailPanel recommendation={recommendation} error={error} />
                 </div>
             </div>
         </div>

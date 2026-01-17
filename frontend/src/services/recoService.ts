@@ -1,5 +1,4 @@
 import type { Area, GridSummary, Recommendation, GridCell } from '../types/domain';
-import { fetchAreasMock, fetchGridSummariesMock, fetchRecommendationDetailMock, fetchGridCellsMock } from '../data/adapters/recoAdapter';
 
 // Types for Service Parameters
 export interface GridFilterParams {
@@ -10,54 +9,78 @@ export interface GridFilterParams {
 
 const RecoService = {
     getAreas: async (): Promise<Area[]> => {
-        // Keep mock for areas as backend doesn't have an endpoint for this yet
-        return new Promise((resolve) => {
-            setTimeout(() => resolve(fetchAreasMock()), 300);
-        });
+        // Backend does not have area endpoint yet, returning mock for now
+        return [
+            { gu: "Seongdong-gu", dongs: ["Seongsu-dong"] }
+        ];
     },
 
     getGridCells: async (): Promise<GridCell[]> => {
         try {
+            // Call Legacy Backend API (/api/grids)
             const response = await fetch('/api/grids?area=seongsu');
-            if (!response.ok) throw new Error('Failed to fetch grids');
+            if (!response.ok) throw new Error(`Failed to fetch grids: ${response.status}`);
             const data = await response.json();
 
-            // Map API response to GridCell domain model
-            return data.map((item: any) => ({
-                grid_id: item.grid_id,
+            // Log first item to debug
+            if (data.length > 0) {
+                console.log("[RecoService] First grid raw:", data[0]);
+            }
+
+            // Define loose type for API response item
+            interface GridResponseItem {
+                grid_id: string | number;
+                centroid: [number, number];
+                ntl_mean?: number;
+            }
+
+            return data.map((item: GridResponseItem) => ({
+                grid_id: String(item.grid_id), // Force string
                 centroid: {
                     lat: item.centroid[0],
                     lon: item.centroid[1]
                 },
                 ntl_mean: item.ntl_mean,
-                // Mock properties not yet in API
-                safety_score: Math.floor(Math.random() * 100),
-                pollution_score: Math.floor(Math.random() * 100)
+                safety_score: 0,
+                pollution_score: 0
             }));
         } catch (error) {
-            console.error("Error fetching grids:", error);
-            // Fallback to mock on error
-            return fetchGridCellsMock();
+            console.error("[RecoService] Error fetching grids:", error);
+            return [];
         }
     },
 
-    getGridSummaries: async (_params: GridFilterParams): Promise<GridSummary[]> => {
-        // Unused in MapPage, keeping mock or empty
-        return new Promise((resolve) => {
-            setTimeout(() => resolve(fetchGridSummariesMock()), 500);
-        });
+    getGridSummaries: async (): Promise<GridSummary[]> => {
+        return [];
     },
 
-    getRecommendationDetail: async (gridId: string, _params: GridFilterParams): Promise<Recommendation | null> => {
+    getRecommendationDetail: async (gridId: string): Promise<Recommendation | null> => {
         try {
-            const response = await fetch(`/api/reco?grid_id=${gridId}`);
-            if (!response.ok) throw new Error('Failed to fetch recommendation');
+            // Force string and encode
+            const safeGridId = encodeURIComponent(String(gridId));
+            const url = `/api/reco?grid_id=${safeGridId}`;
+            console.log(`[RecoService] Fetching reco for grid "${gridId}" at "${url}"`);
+
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(`Status: ${response.status}, Body: ${text}`);
+            }
+
             const data = await response.json();
-            return data as Recommendation;
+
+            return {
+                grid_id: String(gridId),
+                existing_lx: data.existing_lx,
+                recommended_lx: data.recommended_lx,
+                delta_percent: data.delta_percent,
+                dim_hours: data.duration_hours || 3,
+                reasons: data.reasons
+            };
         } catch (error) {
-            console.error("Error fetching recommendation:", error);
-            // Fallback to mock on error
-            return fetchRecommendationDetailMock(gridId);
+            console.error("[RecoService] Error fetching recommendation:", error);
+            throw error; // Let Page handle it
         }
     }
 };
